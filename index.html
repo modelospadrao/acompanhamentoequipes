@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Novo Projeto - Acompanhamento por Base</title>
+  <link rel="icon" href="sprint.png" type="image/png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <style>
+    /* Estilos adaptados do seu projeto original (cores, botões, tipografia) */
+    :root{
+      --accent:#e63946;
+      --dark:#000;
+      --muted:#f0f0f0;
+      --card-bg:#fff;
+    }
+    *{box-sizing:border-box;font-family:Cambria, Cochin, Georgia, Times, serif}
+    body{margin:0;background:#fafafa;padding:18px}
+    .header{ text-align:center; margin-bottom:18px }
+    .header h1{ color:var(--accent); margin:0 0 6px; font-size:22px }
+    .header p{ margin:0; font-style:italic; color:#222 }
+
+    /* Layout responsivo de colunas */
+    .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); align-items:start; }
+    .base-card {
+      background:var(--card-bg);
+      border:2px solid #000;
+      border-radius:10px;
+      padding:12px;
+      position:relative;
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    }
+    .base-card .tab { position:absolute; top:-26px; left:12px; background:#000;color:#fff;padding:6px 18px;border-radius:8px;font-weight:700 }
+    .base-title { text-align:center; font-weight:700; margin:0 0 8px; color:#000 }
+
+    label{display:block;font-weight:600;margin-top:8px;font-size:13px}
+    select,input[type="text"],input[type="number"]{ width:100%; padding:8px; margin-top:4px; border:1px solid #ddd; border-radius:6px; background:var(--muted); text-transform:uppercase }
+    input[type="number"]{ text-align:right }
+
+    .row { display:flex; gap:8px; }
+    .row .col { flex:1 }
+
+    .small { width:80px }
+
+    .actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .btn { padding:8px 12px;border-radius:8px;border:1px solid #000;background:#fff;cursor:pointer }
+    .btn.accent { background:var(--accent); color:#fff; border:none }
+    .btn.green { background:#00b145;color:#fff;border:none }
+    .btn.red { background:#f44336;color:#fff;border:none }
+
+    .preview-box { width:100%; height:140px; margin-top:10px; padding:8px; white-space:pre-wrap; font-family:monospace; background:#f6f6f6; border-radius:6px; border:1px solid #e6e6e6 }
+
+    .counts { display:flex; gap:8px; margin-top:8px; justify-content:space-between }
+    .count { background:#000;color:#fff;padding:8px;border-radius:8px; text-align:center; flex:1 }
+    .count .label{ font-size:13px; display:block }
+    .count .value{ font-size:20px; font-weight:700 }
+
+    footer{ margin-top:18px; text-align:center; color:#333 }
+    @media (max-width:420px){ .row{flex-direction:column} }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>MODELO: Acompanhamento por Base (Dinâmico)</h1>
+    <p>Dados carregados via JSON — cada base tem seu acompanhamento independente</p>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <footer>
+    <small>Arquivos de exemplo: bases.json, supervisores.json, leads.json, bairros.json, dfs.json</small>
+  </footer>
+
+<script>
+// Nomes dos arquivos JSON (devem estar no mesmo diretório)
+const JSON_FILES = {
+  bases: 'bases.json',
+  supervisors: 'supervisores.json',
+  leads: 'leads.json',
+  bairros: 'bairros.json',
+  dfs: 'dfs.json'
+};
+
+// Armazenará os dados carregados
+const DATA = {};
+
+// Função utilitária para fetch JSON com fallback simples
+async function loadJSON(name) {
+  try {
+    const res = await fetch(JSON_FILES[name]);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.error('Erro carregando', name, err);
+    return null;
+  }
+}
+
+// Cria um elemento select com opções
+function createSelect(options = [], attrs = {}){
+  const s = document.createElement('select');
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = '— selecione —';
+  s.appendChild(defaultOpt);
+  options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt;
+    o.textContent = opt;
+    s.appendChild(o);
+  });
+  Object.entries(attrs).forEach(([k,v]) => s.setAttribute(k,v));
+  return s;
+}
+
+// Validação e formatação do telefone (apenas números, max 11)
+function validatePhone(input) {
+  input.value = input.value.replace(/\D/g,'').slice(0,11);
+}
+
+// Cria a coluna/base card
+function createBaseCard(baseName, index){
+  const idPrefix = 'base_' + index;
+  const card = document.createElement('div');
+  card.className = 'base-card';
+  card.innerHTML = `
+    <div class="tab">${baseName}</div>
+    <h3 class="base-title">${baseName}</h3>
+  `;
+
+  // Supervisor
+  const lblSup = document.createElement('label'); lblSup.textContent = 'SUPERVISOR';
+  const selSup = createSelect(DATA.supervisores || [], { id: idPrefix + '_supervisor' });
+  card.appendChild(lblSup); card.appendChild(selSup);
+
+  // Campo para ADD EQUIPE (texto) e botão criar ciclo do lead
+  const lblEquipe = document.createElement('label'); lblEquipe.textContent = 'EQUIPE (ADICIONAR)';
+  const inpEquipe = document.createElement('input'); inpEquipe.type = 'text'; inpEquipe.placeholder = 'NOME DA EQUIPE'; inpEquipe.id = idPrefix + '_equipe';
+  card.appendChild(lblEquipe); card.appendChild(inpEquipe);
+
+  const btnCiclo = document.createElement('button'); btnCiclo.className='btn'; btnCiclo.textContent='Criar Ciclo do Lead';
+  btnCiclo.onclick = () => alert('Ciclo criado para ' + baseName + ' | Equipe: ' + inpEquipe.value.toUpperCase());
+  card.appendChild(btnCiclo);
+
+  // Lead select
+  const lblLead = document.createElement('label'); lblLead.textContent = 'LEAD';
+  const selLead = createSelect(DATA.leads || [], { id: idPrefix + '_lead' });
+  card.appendChild(lblLead); card.appendChild(selLead);
+
+  // Bairro e DF
+  const lblBairro = document.createElement('label'); lblBairro.textContent = 'BAIRRO';
+  const selBairro = createSelect(DATA.bairros || [], { id: idPrefix + '_bairro' });
+  card.appendChild(lblBairro); card.appendChild(selBairro);
+
+  const lblDf = document.createElement('label'); lblDf.textContent = 'DF';
+  const selDf = createSelect(DATA.dfs || [], { id: idPrefix + '_df' });
+  card.appendChild(lblDf); card.appendChild(selDf);
+
+  // Serviços: Enviados / Executados / Pendentes (read-only)
+  const lblServ = document.createElement('label'); lblServ.textContent = 'SERVIÇOS';
+  const row = document.createElement('div'); row.className='row';
+  const col1 = document.createElement('div'); col1.className='col';
+  const inpEnviados = document.createElement('input'); inpEnviados.type='number'; inpEnviados.min=0; inpEnviados.max=99; inpEnviados.id = idPrefix + '_enviados'; inpEnviados.placeholder='ENVIADOS'; inpEnviados.oninput = () => { if (inpEnviados.value.length>2) inpEnviados.value = inpEnviados.value.slice(0,2); calcularPendentes(); };
+
+  const col2 = document.createElement('div'); col2.className='col';
+  const inpExecutados = document.createElement('input'); inpExecutados.type='number'; inpExecutados.min=0; inpExecutados.max=99; inpExecutados.id = idPrefix + '_executados'; inpExecutados.placeholder='EXECUTADOS'; inpExecutados.oninput = () => { if (inpExecutados.value.length>2) inpExecutados.value = inpExecutados.value.slice(0,2); calcularPendentes(); };
+
+  const col3 = document.createElement('div'); col3.className='col';
+  const inpPendentes = document.createElement('input'); inpPendentes.type='text'; inpPendentes.readOnly=true; inpPendentes.id = idPrefix + '_pendentes'; inpPendentes.placeholder='PENDENTES';
+
+  col1.appendChild(inpEnviados);
+  col2.appendChild(inpExecutados);
+  col3.appendChild(inpPendentes);
+  row.appendChild(col1); row.appendChild(col2); row.appendChild(col3);
+
+  card.appendChild(lblServ); card.appendChild(row);
+
+  // Telefone
+  const lblTel = document.createElement('label'); lblTel.textContent = 'TELEFONE COM DDD (APENAS NÚMEROS, 11 dígitos)';
+  const inpTel = document.createElement('input'); inpTel.type='text'; inpTel.placeholder='Ex: 85999999999'; inpTel.maxLength=11; inpTel.id = idPrefix + '_telefone';
+  inpTel.oninput = function(){ validatePhone(this); };
+  card.appendChild(lblTel); card.appendChild(inpTel);
+
+  // Counts (exemplo visual)
+  const counts = document.createElement('div'); counts.className='counts';
+  const c1 = document.createElement('div'); c1.className='count'; c1.innerHTML = '<span class="label">ENVIADOS</span><span class="value" id="'+idPrefix+'_count_enviados">0</span>';
+  const c2 = document.createElement('div'); c2.className='count'; c2.innerHTML = '<span class="label">EXECUTADOS</span><span class="value" id="'+idPrefix+'_count_executados">0</span>';
+  const c3 = document.createElement('div'); c3.className='count'; c3.innerHTML = '<span class="label">PENDENTES</span><span class="value" id="'+idPrefix+'_count_pendentes">0</span>';
+  counts.appendChild(c1); counts.appendChild(c2); counts.appendChild(c3);
+  card.appendChild(counts);
+
+  // Preview textarea (mensagem específica da base)
+  const preview = document.createElement('textarea'); preview.className='preview-box'; preview.id = idPrefix + '_preview'; preview.readOnly=true;
+  card.appendChild(preview);
+
+  // Ações (cada base tem seus próprios botões)
+  const actions = document.createElement('div'); actions.className='actions';
+  const btnGerar = document.createElement('button'); btnGerar.className='btn green'; btnGerar.textContent='Gerar PDF (Base)';
+  const btnCopiar = document.createElement('button'); btnCopiar.className='btn accent'; btnCopiar.textContent='Copiar Mensagem';
+  const btnLimpar = document.createElement('button'); btnLimpar.className='btn red'; btnLimpar.textContent='Limpar Campos';
+
+  btnGerar.onclick = () => gerarPdfBase(baseName, card);
+  btnCopiar.onclick = () => copiarMensagemBase(card);
+  btnLimpar.onclick = () => limparCamposBase(card);
+
+  actions.appendChild(btnGerar); actions.appendChild(btnCopiar); actions.appendChild(btnLimpar);
+  card.appendChild(actions);
+
+  // Função interna para calcular pendentes desta base
+  function calcularPendentes(){
+    const e = parseInt(inpEnviados.value,10) || 0;
+    const x = parseInt(inpExecutados.value,10) || 0;
+    const p = Math.max(0, e - x);
+    inpPendentes.value = p;
+    // atualiza contadores visuais
+    document.getElementById(idPrefix + '_count_enviados').textContent = e;
+    document.getElementById(idPrefix + '_count_executados').textContent = x;
+    document.getElementById(idPrefix + '_count_pendentes').textContent = p;
+    // atualiza preview
+    gerarPreview();
+  }
+
+  // Gera texto de preview só desta base
+  function gerarPreview(){
+    const sup = selSup.value || '';
+    const eqp = inpEquipe.value || '';
+    const lead = selLead.value || '';
+    const bairro = selBairro.value || '';
+    const df = selDf.value || '';
+    const enviados = inpEnviados.value || '0';
+    const executados = inpExecutados.value || '0';
+    const pendentes = inpPendentes.value || '0';
+    const tel = inpTel.value || '';
+
+    const now = new Date();
+    const timeStamp = now.toLocaleString();
+    const txt = [
+      '---- INFO BASE ----',
+      'BASE: ' + baseName,
+      'SUPERVISOR: ' + sup,
+      'EQUIPE: ' + eqp,
+      'LEAD: ' + lead,
+      'BAIRRO: ' + bairro,
+      'DF: ' + df,
+      '',
+      '---- SERVIÇOS ----',
+      'ENVIADOS: ' + enviados,
+      'EXECUTADOS: ' + executados,
+      'PENDENTES: ' + pendentes,
+      '',
+      'TEL: ' + tel,
+      '',
+      'GERADO EM: ' + timeStamp
+    ].join('\n');
+
+    preview.value = txt;
+  }
+
+  // Copiar apenas a mensagem desta base
+  function copiarMensagemBase(cardElement){
+    gerarPreview();
+    preview.select();
+    document.execCommand('copy');
+    alert('Mensagem da base "' + baseName + '" copiada para a área de transferência.');
+  }
+
+  // Limpar apenas os campos desta base
+  function limparCamposBase(cardElement){
+    selSup.selectedIndex = 0;
+    inpEquipe.value = '';
+    selLead.selectedIndex = 0;
+    selBairro.selectedIndex = 0;
+    selDf.selectedIndex = 0;
+    inpEnviados.value = '';
+    inpExecutados.value = '';
+    inpPendentes.value = '';
+    inpTel.value = '';
+    // atualizar contadores e preview
+    document.getElementById(idPrefix + '_count_enviados').textContent = '0';
+    document.getElementById(idPrefix + '_count_executados').textContent = '0';
+    document.getElementById(idPrefix + '_count_pendentes').textContent = '0';
+    preview.value = '';
+  }
+
+  // Gera PDF somente da área do card (base)
+  function gerarPdfBase(baseName, cardElement){
+    gerarPreview(); // atualiza preview antes de gerar
+    const opt = {
+      margin: 8,
+      filename: baseName + '_' + (new Date()).toISOString().slice(0,10) + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'px', format: 'a4', orientation: 'portrait' }
+    };
+    // Clona o node para não alterar a UI e define largura fixa para PDF
+    const clone = card.cloneNode(true);
+    clone.style.width = '700px';
+    html2pdf().set(opt).from(clone).save();
+  }
+
+  // Vincula cálculos aos inputs
+  inpEnviados.addEventListener('input', calcularPendentes);
+  inpExecutados.addEventListener('input', calcularPendentes);
+  inpTel.addEventListener('input', () => { validatePhone(inpTel); gerarPreview(); });
+
+  // Inicializa preview e retorna o card
+  calcularPendentes();
+  return card;
+}
+
+// Função principal: carregamento e montagem da grid
+async function init(){
+  // Carrega todos os JSONs
+  DATA.bases = (await loadJSON('bases'))?.bases || [];
+  DATA.supervisores = (await loadJSON('supervisores'))?.supervisores || [];
+  DATA.leads = (await loadJSON('leads'))?.leads || [];
+  DATA.bairros = (await loadJSON('bairros'))?.bairros || [];
+  DATA.dfs = (await loadJSON('dfs'))?.dfs || [];
+
+  const grid = document.getElementById('grid');
+  if (!DATA.bases.length){
+    const msg = document.createElement('p');
+    msg.textContent = 'Nenhuma base encontrada em bases.json. Adicione bases ao arquivo para ver colunas.';
+    grid.appendChild(msg);
+    return;
+  }
+
+  // Cria uma coluna/card por base
+  DATA.bases.forEach((b, idx) => {
+    const card = createBaseCard(b, idx);
+    grid.appendChild(card);
+  });
+}
+
+// Inicializa ao carregar a página
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
