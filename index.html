@@ -563,7 +563,7 @@
     <div class="coluna ativa" id="coluna1">
       <div class="coluna-header">
         <div class="header-row">
-          <label>🏢 BASE:</label>
+          <label>🏢 REGIÃO:</label>
           <select class="base-select">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -575,7 +575,7 @@
           </select>
         </div>
         <div class="header-row">
-          <label>🌍 REGIÃO:</label>
+          <label>🌍 LOCALIDADE:</label>
           <select class="regiao-select" onchange="atualizarBairrosPorRegiao(1)">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -601,7 +601,7 @@
         <div>EXE</div>
         <div>PEN</div>
         <div>TELEFONE</div>
-        <div>HORA</div>
+        <div>ENTRADA</div>
         <div>OBS</div>
       </div>
 
@@ -622,7 +622,7 @@
     <div class="coluna" id="coluna2">
       <div class="coluna-header">
         <div class="header-row">
-          <label>🏢 BASE:</label>
+          <label>🏢 REGIÃO:</label>
           <select class="base-select">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -634,7 +634,7 @@
           </select>
         </div>
         <div class="header-row">
-          <label>🌍 REGIÃO:</label>
+          <label>🌍 LOCALIDADE:</label>
           <select class="regiao-select" onchange="atualizarBairrosPorRegiao(2)">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -660,7 +660,7 @@
         <div>EXE</div>
         <div>PEN</div>
         <div>TELEFONE</div>
-        <div>HORA</div>
+        <div>ENTRADA</div>
         <div>OBS</div>
       </div>
 
@@ -681,7 +681,7 @@
     <div class="coluna" id="coluna3">
       <div class="coluna-header">
         <div class="header-row">
-          <label>🏢 BASE:</label>
+          <label>🏢 REGIÃO:</label>
           <select class="base-select">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -693,7 +693,7 @@
           </select>
         </div>
         <div class="header-row">
-          <label>🌍 REGIÃO:</label>
+          <label>🌍 LOCALIDADE:</label>
           <select class="regiao-select" onchange="atualizarBairrosPorRegiao(3)">
             <option value="">-- SELECIONE --</option>
           </select>
@@ -719,7 +719,7 @@
         <div>EXE</div>
         <div>PEN</div>
         <div>TELEFONE</div>
-        <div>HORA</div>
+        <div>ENTRADA</div>
         <div>OBS</div>
       </div>
 
@@ -763,13 +763,16 @@
           fetch('./regiao-bairros.json').then(r => r.json()).catch(() => ({}))
         ]);
 
-        dados.bases = bases.length ? bases : ['JACARECANGA', 'MARACANAÚ'];
+        dados.bases = bases.length ? bases : ['DEMEM', 'DEMEF'];
         dados.supervisores = supervisores.length ? supervisores : ['FRANCISCO CLECIO', 'JEFERSON ALVES'];
         dados.leads = leads.length ? leads : ['DFJ-SG-01B', 'DFJ-SG-02C'];
-        dados.bairros = bairros.length ? bairros : ['CENTRO', 'ALDEOTA'];
-        dados.regioes = regioes.length ? regioes : ['DF-001', 'CASCAVEL'];
+        dados.bairros = bairros.length ? bairros : ['AEROLÂNDIA','AEROPORTO','ÁGUA FRIA','ALDEOTA','ALTO DA BALANÇA','ÁLVARO WEYNE','AMADEU FURTADO','ANCURI','ANTÔNIO BEZERRA','AUTRAN NUNES','BARRA DO CEARÁ','BARROSO','BELA VISTA','BENFICA','BOM FUTURO','BOM JARDIM','BONSUCESSO','CAJAZEIRAS','CAIS DO PORTO','CAMBEBA','CANINDEZINHO','CARLITO PAMPLONA','CENTRO','CIDADE 2000','CIDADE DOS FUNCIONÁRIOS','COAÇU','COCÓ','CONJUNTO CEARÁ I','CONJUNTO CEARÁ II','CONJUNTO ESPERANÇA','CONJUNTO PALMEIRAS','COUTO FERNANDES','CRISTO REDENTOR','CURIÓ','DAMAS','DE LOURDES','DEMÓCRITO ROCHA','DENDÊ','DIAS MACEDO','DIONÍSIO TORRES','DOM LUSTOSA','EDSON QUEIROZ','ENGENHEIRO LUCIANO CAVALCANTE','FARIAS BRITO','FÁTIMA','FLORESTA','GENIBAÚ','GRANJA LISBOA','GRANJA PORTUGAL','GUAJERU','GUARARAPES','HENRIQUE JORGE','ITAOCA','ITAPERI','JACARECANGA','JANGURUSSU','JARDIM AMÉRICA','JARDIM CEARENSE','JARDIM DAS OLIVEIRAS','JARDIM GUANABARA','JARDIM IRACEMA','JOÃO XXIII','JOAQUIM TÁVORA','JÓQUEI CLUBE','JOSÉ BONIFÁCIO','JOSÉ DE ALENCAR','JUREMA','LAGOA REDONDA','MAGUARY','MANOEL DIAS BRANCO','MANOEL SÁTIRO','MARAPONGA','MATA GALINHA','MEIRELES','MESSEJANA','MONDUBIM','MONTE CASTELO','MONTESE','MOURA BRASIL','MUCURIPE','OLAVO OLIVEIRA','PADRE ANDRADE','PANAMERICANO','PAPICU','PARANGABA','PARQUE ARAXÁ','PARQUE DOIS IRMÃOS','PARQUE IRACEMA','PARQUE MANIBURA','PARQUELÂNDIA','PARREÃO','PASSARÉ','PAUPINA','PEDRAS','PICI','PIRAMBU','PLANALTO AYRTON SENNA','PRAIA DE IRACEMA','PRAIA DO FUTURO I','PRAIA DO FUTURO II','PREFEITO JOSÉ WALTER','PRESIDENTE KENNEDY','PRESIDENTE VARGAS','QUINTINO CUNHA','RODOLFO TEÓFILO','SABIAGUABA','SALINAS','SANTA MARIA','SANTA ROSA','SÃO BENTO','SÃO GERARDO','SÃO JOÃO DO TAUAPÉ','SÃO JOSÉ','SAPIRANGA/COITÉ','SERRINHA','SIQUEIRA','TAUAPÉ','VARJOTA','VICENTE PINZON','VILA ELLERY','VILA PERI','VILA UNIÃO','VILA VELHA'];
+        dados.regioes = regioes.length ? regioes : ['DF-001', 'DF-002', 'DF-003', 'DF-004','CASCAVEL'];
         dados.regiaoBairros = Object.keys(regiaoBairros).length ? regiaoBairros : {
-          'DF-001': ['CENTRO', 'ALDEOTA'],
+          'DF-001': ['ALDEOTA','BENFICA','CAIS DO PORTO','CENTRO','CIDADE 2000','COCÓ','DE LOURDES','DIONÍSIO TORRES','EDSON QUEIROZ','ENGENHEIRO LUCIANO CAVALCANTE','FARIAS BRITO','FÁTIMA','GUARARAPES','JACARECANGA','JOAQUIM TÁVORA','JOSÉ BONIFÁCIO','MAGUARY','MANOEL DIAS BRANCO','MEIRELES','MOURA BRASIL','MUCURIPE','PAPICU','PRAIA DE IRACEMA','PRAIA DO FUTURO','SABIAGUABA','SALINAS','SÃO GERARDO','SÃO JOÃO DO TAUAPÉ','VARJOTA','VICENTE PINZON'],
+          'DF-002': ['ÁLVARO WEYNE','AMADEU FURTADO','ANTÔNIO BEZERRA','AUTRAN NUNES','BARRA DO CEARÁ','BELA VISTA','CARLITO PAMPLONA','CRISTO REDENTOR','DEMÓCRITO ROCHA','DOM LUSTOSA','FLORESTA','GENIBAÚ','JACARECANGA','JARDIM CEARENSE','JARDIM GUANABARA','JARDIM IRACEMA','JOÃO XXIII','JÓQUEI CLUBE','JUREMA','MAGUARY','MONTE CASTELO','MONTESE','OLAVO OLIVEIRA','PADRE ANDRADE','PANAMERICANO','PARQUE ARAXÁ','PARQUELÂNDIA','PARREÃO','PICI','PIRAMBU','PRESIDENTE KENNEDY','QUINTINO CUNHA','RODOLFO TEÓFILO','SÃO GERARDO','VILA ELLERY','VILA VELHA'],
+          'DF-003': ['AEROPORTO','ALTO DA BALANÇA','ÁLVARO WEYNE','AMADEU FURTADO','ANTÔNIO BEZERRA','AUTRAN NUNES','BELA VISTA','BOM FUTURO','BOM JARDIM','BONSUCESSO','CANINDEZINHO','CONJUNTO CEARÁ','CONJUNTO ESPERANÇA','DAMAS','DEMÓCRITO ROCHA','DENDÊ','DIAS MACEDO','DOM LUSTOSA','GENIBAÚ','GRANJA LISBOA','GRANJA PORTUGAL','HENRIQUE JORGE','ITAOCA','ITAPERI','JARDIM AMÉRICA','JOÃO XXIII','JÓQUEI CLUBE','JUREMA','MANOEL SÁTIRO','MARAPONGA','MATA GALINHA','MONDUBIM','MONTESE','PANAMERICANO','PARANGABA','PARQUE DOIS IRMÃOS','PARREÃO','PASSARÉ','PICI','PLANALTO AYRTON SENNA','PREFEITO JOSÉ WALTER','PRESIDENTE VARGAS','RODOLFO TEÓFILO','SANTA ROSA','SERRINHA','SIQUEIRA','VILA PERI','VILA UNIÃO'],
+          'DF-004': ['AEROLÂNDIA','ÁGUA FRIA','ANCURI','BARROSO','CAJAZEIRAS','CAMBEBA','CIDADE DOS FUNCIONÁRIOS','COAÇU','CONJUNTO PALMEIRAS','CURIÓ','EDSON QUEIROZ','ENGENHEIRO LUCIANO CAVALCANTE','GUAJERU','GUARARAPES','JANGURUSSU','JARDIM DAS OLIVEIRAS','PARQUE IRACEMA','PARQUE MANIBURA','PAUPINA','PEDRAS','SABIAGUABA','SALINAS','SANTA MARIA','SÃO BENTO','SAPIRANGA/COITÉ',],
           'CASCAVEL': ['CASCAVEL CENTRO', 'CASCAVEL NORTE']
         };
 
@@ -840,33 +843,24 @@
       const equipesContainer = coluna.querySelector('.equipes-scroll');
       const bairrosSelects = equipesContainer.querySelectorAll('.bairro-select');
 
-      // Atualiza TODOS os selects de bairro de TODAS as equipes
       bairrosSelects.forEach(sel => {
         const valorAtual = sel.value;
         sel.innerHTML = '<option value="">--</option>';
 
         if (regiaoSelecionada && dados.regiaoBairros[regiaoSelecionada]) {
-          // Carrega só os bairros da região
           dados.regiaoBairros[regiaoSelecionada].forEach(b => {
             sel.innerHTML += `<option value="${b}">${b}</option>`;
           });
         } else {
-          // Se não tem região, mostra todos
           dados.bairros.forEach(b => {
             sel.innerHTML += `<option value="${b}">${b}</option>`;
           });
         }
 
-        // Tenta manter o valor se ainda existir na nova lista
-        if (valorAtual) {
-          const temValor = Array.from(sel.options).some(opt => opt.value === valorAtual);
-          if (temValor) {
-            sel.value = valorAtual;
-          }
-        }
+        if (valorAtual) sel.value = valorAtual;
       });
 
-      mostrarPopup(`🔄 Região: ${regiaoSelecionada || 'TODOS'}`);
+      mostrarPopup(`🔄 ${regiaoSelecionada || 'TODOS'}`);
     }
 
     function toggleObservacao(btn) {
@@ -971,10 +965,8 @@
 
       let opcoesBairros = '';
       if (regiaoSelecionada && dados.regiaoBairros[regiaoSelecionada]) {
-        // Usa os bairros da região selecionada
         opcoesBairros = dados.regiaoBairros[regiaoSelecionada].map(b => `<option value="${b}">${b}</option>`).join('');
       } else {
-        // Se não tem região, mostra todos
         opcoesBairros = dados.bairros.map(b => `<option value="${b}">${b}</option>`).join('');
       }
 
@@ -1059,9 +1051,9 @@
       const equipes = coluna.querySelectorAll('.equipe-container');
 
       let msg = `---- *INFO. BASE* ----\n`;
-      msg += `*BASE:* ${base || 'NÃO SELECIONADA'}\n`;
+      msg += `*REGIÃO:* ${base || 'NÃO SELECIONADA'}\n`;
       msg += `*SUPERVISOR:* ${supervisor || 'NÃO SELECIONADO'}\n`;
-      msg += `*REGIÃO:* ${regiao || 'NÃO SELECIONADA'}\n`;
+      msg += `*LOCALIDADE:* ${regiao || 'NÃO SELECIONADA'}\n`;
       msg += `*TOTAL EQUIPES:* (${equipes.length})\n\n`;
 
       equipes.forEach((container, i) => {
@@ -1086,7 +1078,7 @@
         msg += `*BAIRRO(S):* ${bairros}\n`;
         msg += `*ENVIADOS:* ${env} | *EXEC:* ${exe} | *PEND:* ${pend}\n`;
         msg += `*TELEFONE:* ${tel}\n`;
-        msg += `*HORA:* ${hora}\n`;
+        msg += `*ENTRADA:* ${hora}\n`;
         if (obs) {
           msg += `*OBS:* ${obs}\n`;
         }
