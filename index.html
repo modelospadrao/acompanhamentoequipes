@@ -264,7 +264,7 @@
     /* LINHA DE EQUIPE - SEM COLUNA DF */
     .equipe-linha {
       display: grid;
-      grid-template-columns: 1fr 2.5fr 0.6fr 0.6fr 0.6fr 1fr 0.8fr 0.5fr;
+      grid-template-columns: 1fr 2fr 1fr 0.8fr 0.5fr 0.6fr 0.6fr 0.6fr;
       gap: 6px;
       padding: 8px;
       background: #fff5f5;
@@ -422,7 +422,7 @@
     /* LABELS DOS CAMPOS */
     .labels-header {
       display: grid;
-      grid-template-columns: 1fr 2.5fr 0.6fr 0.6fr 0.6fr 1fr 0.8fr 0.5fr;
+      grid-template-columns: 1fr 2fr 1fr 0.8fr 0.5fr 0.6fr 0.6fr 0.6fr;
       gap: 6px;
       padding: 6px 8px;
       background: #ddd;
@@ -538,11 +538,99 @@
     .equipes-scroll::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+
+
+    /* ABA DE REMOVER (ESTILO CHROME) */
+    .btn-aba-remover {
+      position: absolute;
+      top: -14px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+      color: #666;
+      border: 1px solid #bbb;
+      border-bottom: 2px solid #000;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: all 0.2s;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-aba-remover:hover {
+      background: linear-gradient(to bottom, #ff5252, #f44336);
+      color: #fff;
+      border-color: #d32f2f;
+    }
+
+    .equipe-container {
+      position: relative;
+      margin-top: 20px;
+      margin-bottom: 5px;
+    }
+
+    /* BOTÃO TOGGLE SERVIÇOS GLOBAL */
+    .btn-toggle-global {
+      padding: 8px 16px;
+      background: #9c27b0;
+      color: #fff;
+      border: 2px solid #7b1fa2;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    .btn-toggle-global:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    }
+
+    .btn-toggle-global.ativo {
+      background: #7b1fa2;
+      box-shadow: 0 0 10px rgba(156, 39, 176, 0.6);
+    }
+
+    /* MOSTRAR CAMPOS DE SERVIÇO QUANDO ATIVO */
+/* CAMPOS DE SERVIÇO NO FINAL */
+    .equipe-linha .enviados,
+    .equipe-linha .executados,
+    .equipe-linha .pendentes {
+      grid-column: auto;
+    }
+
+    .servicos-ativos .enviados,
+    .servicos-ativos .executados,
+    .servicos-ativos .pendentes {
+      display: block !important;
+    }
+    .servicos-wrapper.ativo {
+      display: flex !important;
+    }
+
+    .btn-toggle-servicos.ativo {
+      background: #7b1fa2 !important;
+      box-shadow: 0 0 10px rgba(156, 39, 176, 0.6);
+    }
+
+    .btn-remover-equipe:hover {
+      transform: scale(1.1);
+      background: #d32f2f !important;
+      box-shadow: 0 4px 10px rgba(244, 67, 54, 0.4);
+    }
   </style>
 </head>
 <body>
   <h1>🚗 ACOMPANHAMENTO DE EQUIPES EM CAMPO</h1>
-  <h2>(Sistema de Controle por Base - Versão 11.0 - Backup de Estado + UI Aprimorada)</h2>
+  <h2>(Sistema de Controle de Troca de turnos - Versão 11.0)</h2>
 
   <!-- BOTÕES SALVAR/CARREGAR ESTADO -->
   <div class="estado-controles">
@@ -552,10 +640,10 @@
   </div>
 
   <div class="controle-visualizacao">
-    <h3>📊 Quantas bases acompanhar:</h3>
-    <button class="btn-visualizacao active" onclick="mudarVisualizacao(1)">1 Base</button>
-    <button class="btn-visualizacao" onclick="mudarVisualizacao(2)">2 Bases</button>
-    <button class="btn-visualizacao" onclick="mudarVisualizacao(3)">3 Bases</button>
+    <h3>📊 Quantas àreas irá acompanhar no dia?</h3>
+    <button class="btn-visualizacao active" onclick="mudarVisualizacao(1)">1</button>
+    <button class="btn-visualizacao" onclick="mudarVisualizacao(2)">2</button>
+    <button class="btn-visualizacao" onclick="mudarVisualizacao(3)">3</button>
   </div>
 
   <div class="bases-container" id="container">
@@ -564,15 +652,13 @@
       <div class="coluna-header">
         <div class="header-row">
           <label>🏢 REGIÃO:</label>
-          <select class="base-select">
+          <select class="base-select" onchange="filtrarLocalidadePorRegiao(1)">
             <option value="">-- SELECIONE --</option>
           </select>
         </div>
         <div class="header-row">
-          <label>👤 SUPERVISOR:</label>
-          <select class="supervisor-select">
-            <option value="">-- SELECIONE --</option>
-          </select>
+          <label>👤 OPERADOR:</label>
+          <input type="text" class="supervisor-input" placeholder="DIGITE O OPERADOR" style="text-transform: uppercase; padding: 8px; border: 2px solid #000; border-radius: 4px; font-size: 14px; font-weight: bold;">
         </div>
         <div class="header-row">
           <label>🌍 LOCALIDADE:</label>
@@ -584,7 +670,8 @@
 
       <div class="acoes-grupo">
         <button class="btn-adicionar" onclick="adicionarEquipe(1)">➕ Adicionar</button>
-        <button class="btn-remover" onclick="removerEquipe(1)">➖ Remover</button>
+        <button class="btn-remover" onclick="removerTodasEquipes(1)">🗑️ Remover Todas</button>
+        <button class="btn-toggle-global" onclick="toggleServicosGlobal(1)">📊 Ativar Serviços</button>
       </div>
 
       <div class="filtros-container">
@@ -597,12 +684,12 @@
       <div class="labels-header">
         <div>LEAD</div>
         <div>BAIRRO(S)</div>
-        <div>ENV</div>
-        <div>EXE</div>
-        <div>PEN</div>
         <div>TELEFONE</div>
         <div>ENTRADA</div>
         <div>OBS</div>
+        <div>ENV</div>
+        <div>EXE</div>
+        <div>PEN</div>
       </div>
 
       <div class="equipes-scroll" id="equipes1"></div>
@@ -623,15 +710,13 @@
       <div class="coluna-header">
         <div class="header-row">
           <label>🏢 REGIÃO:</label>
-          <select class="base-select">
+          <select class="base-select" onchange="filtrarLocalidadePorRegiao(2)">
             <option value="">-- SELECIONE --</option>
           </select>
         </div>
         <div class="header-row">
-          <label>👤 SUPERVISOR:</label>
-          <select class="supervisor-select">
-            <option value="">-- SELECIONE --</option>
-          </select>
+          <label>👤 OPERADOR:</label>
+          <input type="text" class="supervisor-input" placeholder="DIGITE O OPERADOR" style="text-transform: uppercase; padding: 8px; border: 2px solid #000; border-radius: 4px; font-size: 14px; font-weight: bold;">
         </div>
         <div class="header-row">
           <label>🌍 LOCALIDADE:</label>
@@ -643,7 +728,8 @@
 
       <div class="acoes-grupo">
         <button class="btn-adicionar" onclick="adicionarEquipe(2)">➕ Adicionar</button>
-        <button class="btn-remover" onclick="removerEquipe(2)">➖ Remover</button>
+        <button class="btn-remover" onclick="removerTodasEquipes(2)">🗑️ Remover Todas</button>
+        <button class="btn-toggle-global" onclick="toggleServicosGlobal(2)">📊 Ativar Serviços</button>
       </div>
 
       <div class="filtros-container">
@@ -656,12 +742,12 @@
       <div class="labels-header">
         <div>LEAD</div>
         <div>BAIRRO(S)</div>
-        <div>ENV</div>
-        <div>EXE</div>
-        <div>PEN</div>
         <div>TELEFONE</div>
         <div>ENTRADA</div>
         <div>OBS</div>
+        <div>ENV</div>
+        <div>EXE</div>
+        <div>PEN</div>
       </div>
 
       <div class="equipes-scroll" id="equipes2"></div>
@@ -682,15 +768,13 @@
       <div class="coluna-header">
         <div class="header-row">
           <label>🏢 REGIÃO:</label>
-          <select class="base-select">
+          <select class="base-select" onchange="filtrarLocalidadePorRegiao(3)">
             <option value="">-- SELECIONE --</option>
           </select>
         </div>
         <div class="header-row">
-          <label>👤 SUPERVISOR:</label>
-          <select class="supervisor-select">
-            <option value="">-- SELECIONE --</option>
-          </select>
+          <label>👤 OPERADOR:</label>
+          <input type="text" class="supervisor-input" placeholder="DIGITE O OPERADOR" style="text-transform: uppercase; padding: 8px; border: 2px solid #000; border-radius: 4px; font-size: 14px; font-weight: bold;">
         </div>
         <div class="header-row">
           <label>🌍 LOCALIDADE:</label>
@@ -702,7 +786,8 @@
 
       <div class="acoes-grupo">
         <button class="btn-adicionar" onclick="adicionarEquipe(3)">➕ Adicionar</button>
-        <button class="btn-remover" onclick="removerEquipe(3)">➖ Remover</button>
+        <button class="btn-remover" onclick="removerTodasEquipes(3)">🗑️ Remover Todas</button>
+        <button class="btn-toggle-global" onclick="toggleServicosGlobal(3)">📊 Ativar Serviços</button>
       </div>
 
       <div class="filtros-container">
@@ -715,12 +800,12 @@
       <div class="labels-header">
         <div>LEAD</div>
         <div>BAIRRO(S)</div>
-        <div>ENV</div>
-        <div>EXE</div>
-        <div>PEN</div>
         <div>TELEFONE</div>
         <div>ENTRADA</div>
         <div>OBS</div>
+        <div>ENV</div>
+        <div>EXE</div>
+        <div>PEN</div>
       </div>
 
       <div class="equipes-scroll" id="equipes3"></div>
@@ -802,13 +887,6 @@
         });
       });
 
-      document.querySelectorAll('.supervisor-select').forEach(sel => {
-        sel.innerHTML = '<option value="">-- SELECIONE --</option>';
-        dados.supervisores.forEach(sup => {
-          sel.innerHTML += `<option value="${sup}">${sup}</option>`;
-        });
-      });
-
       document.querySelectorAll('.regiao-select').forEach(sel => {
         sel.innerHTML = '<option value="">-- SELECIONE --</option>';
         dados.regioes.forEach(regiao => {
@@ -871,6 +949,112 @@
       obsDiv.classList.toggle('visivel');
       btn.classList.toggle('ativo');
       btn.textContent = isVisible ? '💬' : '✖️';
+    }
+
+
+    // MÁSCARA AUTOMÁTICA DO LEAD
+    function aplicarMascaraLead(input) {
+      let valor = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      
+      if (valor.length > 8) {
+        valor = valor.substring(0, 8);
+      }
+      
+      let mascarado = '';
+      for (let i = 0; i < valor.length; i++) {
+        if (i === 3 || i === 5) {
+          mascarado += '-';
+        }
+        mascarado += valor[i];
+      }
+      
+      input.value = mascarado;
+    }
+
+    // TOGGLE SERVIÇOS GLOBAL
+    function toggleServicosGlobal(col) {
+      const coluna = document.getElementById(`coluna${col}`);
+      const btn = event.target;
+      const equipesContainer = coluna.querySelector('.equipes-scroll');
+      
+      equipesContainer.classList.toggle('servicos-ativos');
+      btn.classList.toggle('ativo');
+      
+      const ativo = equipesContainer.classList.contains('servicos-ativos');
+      btn.textContent = ativo ? '📊 Desativar Serviços' : '📊 Ativar Serviços';
+      
+      // Se desativar, limpar todos os valores
+      if (!ativo) {
+        const inputs = equipesContainer.querySelectorAll('.enviados, .executados, .pendentes');
+        inputs.forEach(input => input.value = '');
+      }
+      
+      mostrarPopup(ativo ? '✅ Serviços ativados!' : '❌ Serviços desativados!');
+    }
+
+    // REMOVER EQUIPE INDIVIDUAL
+    function removerEquipeIndividual(btn) {
+      const equipeContainer = btn.closest('.equipe-container');
+      equipeContainer.remove();
+      mostrarPopup('❌ Equipe removida!');
+    }
+
+    // REMOVER TODAS AS EQUIPES
+    function removerTodasEquipes(col) {
+      const container = document.getElementById(`equipes${col}`);
+      if (container.children.length === 0) {
+        mostrarPopup('⚠️ Nenhuma equipe!');
+        return;
+      }
+      
+      // Usar popup personalizado em vez de confirm
+      const confirmacao = mostrarPopupConfirmacao('Deseja remover TODAS as equipes?');
+      if (confirmacao) {
+        container.innerHTML = '';
+        contadores[col] = 0;
+        mostrarPopup('🗑️ Todas removidas!');
+      }
+    }
+
+    // POPUP DE CONFIRMAÇÃO PERSONALIZADO
+    function mostrarPopupConfirmacao(mensagem) {
+      const resultado = confirm(mensagem);
+      return resultado;
+    }
+
+    // FILTRAR LOCALIDADE POR REGIÃO
+    function filtrarLocalidadePorRegiao(col) {
+      const coluna = document.getElementById(`coluna${col}`);
+      const regiaoSelecionada = coluna.querySelector('.base-select').value;
+      const localidadeSelect = coluna.querySelector('.regiao-select');
+      
+      localidadeSelect.innerHTML = '<option value="">-- SELECIONE --</option>';
+      
+      let localidadesFiltradas = [];
+      
+      if (regiaoSelecionada === 'DEMEF') {
+        // DEMEF mostra APENAS os 4 DFs
+        localidadesFiltradas = dados.regioes.filter(r => 
+          r === 'DF-001' || r === 'DF-002' || r === 'DF-003' || r === 'DF-004'
+        );
+      } else if (regiaoSelecionada === 'DEMEM') {
+        // DEMEM mostra TUDO EXCETO os DFs
+        localidadesFiltradas = dados.regioes.filter(r => 
+          !r.startsWith('DF-')
+        );
+      } else if (regiaoSelecionada) {
+        // Qualquer outra região mostra tudo
+        localidadesFiltradas = dados.regioes;
+      }
+      
+      localidadesFiltradas.forEach(localidade => {
+        localidadeSelect.innerHTML += `<option value="${localidade}">${localidade}</option>`;
+      });
+      
+      localidadeSelect.value = '';
+      atualizarBairrosPorRegiao(col);
+      
+      mostrarPopup(`📍 ${regiaoSelecionada || 'Região limpa'}`);
     }
 
     function adicionarBairro(btn) {
@@ -938,8 +1122,8 @@
           let valA, valB;
 
           if (tipo === 'lead') {
-            valA = a.querySelector('.lead-select').value;
-            valB = b.querySelector('.lead-select').value;
+            valA = a.querySelector('.lead-input').value;
+            valB = b.querySelector('.lead-input').value;
           } else if (tipo === 'bairro') {
             valA = a.querySelector('.bairro-select').value;
             valB = b.querySelector('.bairro-select').value;
@@ -975,11 +1159,9 @@
       equipeContainer.dataset.ordem = contadores[col];
 
       equipeContainer.innerHTML = `
+        <button class="btn-aba-remover" onclick="removerEquipeIndividual(this)" title="Remover equipe">×</button>
         <div class="equipe-linha">
-          <select class="lead-select">
-            <option value="">--</option>
-            ${dados.leads.map(l => `<option value="${l}">${l}</option>`).join('')}
-          </select>
+          <input type="text" class="lead-input" placeholder="XXX-XX-XXX" maxlength="11" oninput="aplicarMascaraLead(this)" style="text-transform: uppercase; padding: 8px; border: 2px solid #ccc; border-radius: 4px; font-size: 13px; width: 100%;">
 
           <div class="bairros-container">
             <div class="bairro-item">
@@ -994,12 +1176,6 @@
             </div>
           </div>
 
-          <input type="number" class="enviados" min="0" max="99" placeholder="0" oninput="calcularPendentes(this)">
-
-          <input type="number" class="executados" min="0" max="99" placeholder="0" oninput="calcularPendentes(this)">
-
-          <input type="number" class="pendentes" readonly placeholder="0">
-
           <input type="text" class="telefone" maxlength="11" placeholder="85999999999" oninput="this.value=this.value.replace(/\\D/g,'')">
 
           <div class="hora-grupo">
@@ -1008,6 +1184,12 @@
           </div>
 
           <button class="btn-obs" onclick="toggleObservacao(this)">💬</button>
+
+          <input type="number" class="enviados" min="0" max="99" placeholder="0" oninput="calcularPendentes(this)" style="display: none;">
+
+          <input type="number" class="executados" min="0" max="99" placeholder="0" oninput="calcularPendentes(this)" style="display: none;">
+
+          <input type="number" class="pendentes" readonly placeholder="0" style="display: none;">
         </div>
 
         <div class="obs-equipe">
@@ -1046,19 +1228,19 @@
     function gerarMensagem(col) {
       const coluna = document.getElementById(`coluna${col}`);
       const base = coluna.querySelector('.base-select').value;
-      const supervisor = coluna.querySelector('.supervisor-select').value;
+      const supervisor = coluna.querySelector('.supervisor-input').value.trim();
       const regiao = coluna.querySelector('.regiao-select').value;
       const equipes = coluna.querySelectorAll('.equipe-container');
 
       let msg = `---- *INFO. BASE* ----\n`;
       msg += `*REGIÃO:* ${base || 'NÃO SELECIONADA'}\n`;
-      msg += `*SUPERVISOR:* ${supervisor || 'NÃO SELECIONADO'}\n`;
+      msg += `*OPERADOR:* ${supervisor || 'NÃO SELECIONADO'}\n`;
       msg += `*LOCALIDADE:* ${regiao || 'NÃO SELECIONADA'}\n`;
       msg += `*TOTAL EQUIPES:* (${equipes.length})\n\n`;
 
       equipes.forEach((container, i) => {
         const linha = container.querySelector('.equipe-linha');
-        const lead = linha.querySelector('.lead-select').value || 'N/A';
+        const lead = linha.querySelector('.lead-input').value.trim() || 'N/A';
 
         const bairrosSelects = linha.querySelectorAll('.bairro-select');
         const bairros = Array.from(bairrosSelects)
@@ -1066,9 +1248,8 @@
           .filter(v => v)
           .join(', ') || 'N/A';
 
-        const env = linha.querySelector('.enviados').value || '0';
-        const exe = linha.querySelector('.executados').value || '0';
-        const pend = linha.querySelector('.pendentes').value || '0';
+        const equipesContainer = container.closest('.equipes-scroll');
+        const servicosAtivos = equipesContainer.classList.contains('servicos-ativos');
         const tel = linha.querySelector('.telefone').value || 'NÃO INFORMADO';
         const hora = linha.querySelector('.hora-apresentacao').value || 'N/A';
         const obs = container.querySelector('.obs-textarea').value.trim();
@@ -1076,7 +1257,13 @@
         msg += `---- *EQUIPE ${i + 1}* ----\n`;
         msg += `*LEAD:* ${lead}\n`;
         msg += `*BAIRRO(S):* ${bairros}\n`;
-        msg += `*ENVIADOS:* ${env} | *EXEC:* ${exe} | *PEND:* ${pend}\n`;
+        
+        if (servicosAtivos) {
+          const env = linha.querySelector('.enviados').value || '0';
+          const exe = linha.querySelector('.executados').value || '0';
+          const pend = linha.querySelector('.pendentes').value || '0';
+          msg += `*ENVIADOS:* ${env} | *EXEC:* ${exe} | *PEND:* ${pend}\n`;
+        }
         msg += `*TELEFONE:* ${tel}\n`;
         msg += `*ENTRADA:* ${hora}\n`;
         if (obs) {
@@ -1141,10 +1328,12 @@
         const coluna = document.getElementById(`coluna${col}`);
         if (!coluna.classList.contains('ativa')) continue;
 
+        const equipesContainer = coluna.querySelector('.equipes-scroll');
         const colunaEstado = {
           base: coluna.querySelector('.base-select').value,
-          supervisor: coluna.querySelector('.supervisor-select').value,
+          supervisor: coluna.querySelector('.supervisor-input').value,
           regiao: coluna.querySelector('.regiao-select').value,
+          servicosAtivos: equipesContainer.classList.contains('servicos-ativos'),
           equipes: []
         };
 
@@ -1154,7 +1343,7 @@
           const bairrosSelects = linha.querySelectorAll('.bairro-select');
           
           colunaEstado.equipes.push({
-            lead: linha.querySelector('.lead-select').value,
+            lead: linha.querySelector('.lead-input').value,
             bairros: Array.from(bairrosSelects).map(s => s.value),
             enviados: linha.querySelector('.enviados').value,
             executados: linha.querySelector('.executados').value,
@@ -1201,8 +1390,19 @@
             const coluna = document.getElementById(`coluna${col}`);
             
             coluna.querySelector('.base-select').value = colEstado.base || '';
-            coluna.querySelector('.supervisor-select').value = colEstado.supervisor || '';
+            coluna.querySelector('.supervisor-input').value = colEstado.supervisor || '';
             coluna.querySelector('.regiao-select').value = colEstado.regiao || '';
+            
+            // Restaurar estado global dos serviços
+            if (colEstado.servicosAtivos) {
+              const equipesContainer = coluna.querySelector('.equipes-scroll');
+              equipesContainer.classList.add('servicos-ativos');
+              const btnToggle = coluna.querySelector('.btn-toggle-global');
+              if (btnToggle) {
+                btnToggle.classList.add('ativo');
+                btnToggle.textContent = '📊 Desativar Serviços';
+              }
+            }
 
             // Restaura equipes
             colEstado.equipes.forEach(eqData => {
@@ -1212,7 +1412,7 @@
               const ultimaEquipe = container.lastChild;
               const linha = ultimaEquipe.querySelector('.equipe-linha');
               
-              linha.querySelector('.lead-select').value = eqData.lead || '';
+              linha.querySelector('.lead-input').value = eqData.lead || '';
               
               // Restaura bairros
               const bairrosContainer = linha.querySelector('.bairros-container');
